@@ -1,0 +1,6 @@
+{
+  "name": "Fleet and Transport Manager",
+  "description": "An industrial-grade fleet operations and transport logistics control system featuring dispatching, route optimization, maintenance scheduling, and an AI operational assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
