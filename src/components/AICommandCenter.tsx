@@ -91,7 +91,7 @@ Use the quick action buttons below or type your own question!`,
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-purple-600" /> AI Operations Copilot
+            <Sparkles className="w-6 h-6 text-[#0F766E]" /> AI Operations Copilot
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Powered by Gemini AI · Ask questions in natural language
@@ -111,7 +111,7 @@ Use the quick action buttons below or type your own question!`,
               key={qp.label}
               onClick={() => sendMessage(qp.prompt)}
               disabled={loading}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-[#1C2526] border border-[#E2EAE7] dark:border-[#2D3A32] text-slate-600 dark:text-[#6B7280] hover:border-[#0F766E] hover:text-[#0F766E] hover:bg-[#0F766E]/5 dark:hover:bg-[#0F766E]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icon className="w-3 h-3" /> {qp.label}
             </button>
@@ -122,7 +122,7 @@ Use the quick action buttons below or type your own question!`,
       {/* Chat window */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4 mb-4"
+        className="flex-1 overflow-y-auto bg-white dark:bg-[#1C2526] rounded-2xl border border-[#E2EAE7] dark:border-[#2D3A32] p-5 space-y-4 mb-4"
       >
         <AnimatePresence initial={false}>
           {messages.map(msg => (
@@ -134,8 +134,8 @@ Use the quick action buttons below or type your own question!`,
               className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${msg.role === 'user'
-                  ? 'bg-blue-600'
-                  : 'bg-gradient-to-br from-purple-600 to-blue-600'
+                  ? 'bg-[#0F766E]'
+                  : 'bg-gradient-to-br from-[#0F766E] to-[#0A3C36]'
                 }`}>
                 {msg.role === 'user'
                   ? <User className="w-4 h-4 text-white" />
@@ -145,11 +145,11 @@ Use the quick action buttons below or type your own question!`,
 
               <div className={`max-w-[80%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
                 <div className={`rounded-2xl px-4 py-3 text-sm ${msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-tr-sm'
-                    : 'bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-600'
+                    ? 'bg-[#0F766E] text-[#111827] rounded-tr-sm'
+                    : 'bg-[#F8FAF8] dark:bg-[#0F1712] text-slate-800 dark:text-[#F3F4F6] rounded-tl-sm border border-[#E2EAE7] dark:border-[#2D3A32]'
                   }`}>
                   {msg.role === 'assistant' ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-li:my-0.5 prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/20 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-li:my-0.5 prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-code:text-[#0F766E] dark:prose-code:text-[#0F766E] prose-code:bg-[#0F766E]/10 dark:prose-code:bg-[#0F766E]/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   ) : (
@@ -170,12 +170,12 @@ Use the quick action buttons below or type your own question!`,
             animate={{ opacity: 1, y: 0 }}
             className="flex gap-3"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F766E] to-[#0A3C36] flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-[#F8FAF8] dark:bg-[#0F1712] border border-[#E2EAE7] dark:border-[#2D3A32] rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                <Loader2 className="w-4 h-4 animate-spin text-[#0F766E]" />
                 <span className="text-sm">Analyzing fleet data...</span>
               </div>
             </div>

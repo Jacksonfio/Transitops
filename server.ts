@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import net from "net";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -9,12 +10,12 @@ dotenv.config();
 import {
   initialVehicles, initialDrivers, initialTrips,
   initialMaintenanceLogs, initialFuelLogs, initialExpenses,
-  initialAlerts, initialUsers
+  initialAlerts, initialUsers, initialGeofences, initialVehiclePositions, initialTrackingAlerts
 } from "./src/data";
 
 import {
   Vehicle, Driver, Trip, MaintenanceLog,
-  FuelLog, Expense, Alert, User
+  FuelLog, Expense, Alert, User, Geofence, VehiclePosition, TrackingAlert
 } from "./src/types";
 
 // ── In-memory stores ─────────────────────────────────────────────────────────
@@ -26,9 +27,39 @@ let fuelLogs: FuelLog[] = JSON.parse(JSON.stringify(initialFuelLogs));
 let expenses: Expense[] = JSON.parse(JSON.stringify(initialExpenses));
 let alerts: Alert[] = JSON.parse(JSON.stringify(initialAlerts));
 const users: User[] = JSON.parse(JSON.stringify(initialUsers));
+// Tracking
+let geofences: Geofence[] = JSON.parse(JSON.stringify(initialGeofences));
+let vehiclePositions: VehiclePosition[] = JSON.parse(JSON.stringify(initialVehiclePositions));
+let trackingAlerts: TrackingAlert[] = JSON.parse(JSON.stringify(initialTrackingAlerts));
 
 // ── ID generators ─────────────────────────────────────────────────────────────
 const genId = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
+
+function isPortAvailableOnHost(port: number, host: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const tester = net
+      .createServer()
+      .once("error", () => resolve(false))
+      .once("listening", () => {
+        tester.close(() => resolve(true));
+      })
+      .listen(port, host);
+  });
+}
+
+async function isPortAvailable(port: number) {
+  const checks = await Promise.all([
+    isPortAvailableOnHost(port, "0.0.0.0"),
+    isPortAvailableOnHost(port, "::"),
+  ]);
+  return checks.every(Boolean);
+}
+
+async function findAvailablePort(preferredPort: number) {
+  let port = preferredPort;
+  while (!(await isPortAvailable(port))) port += 1;
+  return port;
+}
 
 // ── Gemini AI ─────────────────────────────────────────────────────────────────
 let aiClient: GoogleGenAI | null = null;
@@ -110,28 +141,49 @@ function validateTrip(tripData: Omit<Trip, 'id' | 'createdAt'>): string | null {
 // ── Server ────────────────────────────────────────────────────────────────────
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+  const requestedPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const PORT = await findAvailablePort(requestedPort);
+  const HMR_PORT = await findAvailablePort(process.env.HMR_PORT ? parseInt(process.env.HMR_PORT, 10) : 24678);
 
   app.use(express.json({ limit: '10mb' }));
 
   // Run auto-alerts on start
   generateAutoAlerts();
 
-  // ── Auth ───────────────────────────────────────────────────────────────────
   app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
-    if (password !== 'TransitOps@2026') {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
     const user = users.find(u => u.email === email);
     if (!user) return res.status(401).json({ error: 'User not found' });
+
+    // allow demo password or real password
+    if (password !== 'TransitOps@2026' && password !== user.password) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    res.json({ user, token: 'jwt-mock-token-' + user.id });
+  });
+
+  app.post('/api/auth/register', (req, res) => {
+    const { name, email, password, role } = req.body;
+    if (users.find(u => u.email === email)) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    const user: User = {
+      id: genId('U'),
+      name,
+      email,
+      role: role || 'driver',
+      password
+    };
+    users.push(user);
     res.json({ user, token: 'jwt-mock-token-' + user.id });
   });
 
   // ── Main data endpoint ─────────────────────────────────────────────────────
   app.get('/api/fleet-data', (req, res) => {
     generateAutoAlerts();
-    res.json({ vehicles, drivers, trips, maintenanceLogs, fuelLogs, expenses, alerts });
+    res.json({ vehicles, drivers, trips, maintenanceLogs, fuelLogs, expenses, alerts, geofences, vehiclePositions, trackingAlerts });
   });
 
   // ── Vehicles ───────────────────────────────────────────────────────────────
@@ -359,6 +411,55 @@ async function startServer() {
     res.json({ ok: true });
   });
 
+  // ── Geofences ────────────────────────────────────────────────────────────────
+  app.get('/api/geofences', (_, res) => res.json(geofences));
+
+  app.post('/api/geofences', (req, res) => {
+    const data = req.body as Omit<Geofence, 'id' | 'createdAt'>;
+    const geofence: Geofence = { ...data, id: genId('GF'), createdAt: new Date().toISOString() };
+    geofences.push(geofence);
+    res.json({ ok: true, geofence });
+  });
+
+  app.patch('/api/geofences/:id', (req, res) => {
+    const idx = geofences.findIndex(g => g.id === req.params.id);
+    if (idx < 0) return res.status(404).json({ error: 'Geofence not found' });
+    geofences[idx] = { ...geofences[idx], ...req.body };
+    res.json({ ok: true, geofence: geofences[idx] });
+  });
+
+  app.delete('/api/geofences/:id', (req, res) => {
+    const idx = geofences.findIndex(g => g.id === req.params.id);
+    if (idx < 0) return res.status(404).json({ error: 'Geofence not found' });
+    geofences.splice(idx, 1);
+    res.json({ ok: true });
+  });
+
+  // ── Vehicle Positions ────────────────────────────────────────────────────────
+  app.get('/api/vehicle-positions', (_, res) => res.json(vehiclePositions));
+
+  app.post('/api/vehicle-positions', (req, res) => {
+    const data = req.body as Omit<VehiclePosition, 'timestamp'>;
+    const position: VehiclePosition = { ...data, timestamp: new Date().toISOString() };
+    const idx = vehiclePositions.findIndex(p => p.vehicleId === data.vehicleId);
+    if (idx >= 0) {
+      vehiclePositions[idx] = position;
+    } else {
+      vehiclePositions.push(position);
+    }
+    res.json({ ok: true, position });
+  });
+
+  // ── Tracking Alerts ─────────────────────────────────────────────────────────
+  app.get('/api/tracking-alerts', (_, res) => res.json(trackingAlerts));
+
+  app.patch('/api/tracking-alerts/:id/resolve', (req, res) => {
+    const idx = trackingAlerts.findIndex(a => a.id === req.params.id);
+    if (idx < 0) return res.status(404).json({ error: 'Tracking alert not found' });
+    trackingAlerts[idx].resolved = true;
+    res.json({ ok: true });
+  });
+
   // ── AI Copilot ─────────────────────────────────────────────────────────────
   app.post('/api/ai/chat', async (req, res) => {
     const { message } = req.body;
@@ -479,7 +580,6 @@ You answer fleet operations questions concisely with data-driven insights. Use m
 
     const eligibleDrivers = drivers.filter(d => {
       if (d.status !== 'Available') return false;
-      if (d.status === 'Suspended') return false;
       const exp = new Date(d.licenseExpiry);
       return exp > new Date();
     }).sort((a, b) => b.safetyScore - a.safetyScore);
@@ -496,7 +596,10 @@ You answer fleet operations questions concisely with data-driven insights. Use m
   // ── Frontend serving ───────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: process.env.DISABLE_HMR === 'true' ? false : { port: HMR_PORT },
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -507,9 +610,10 @@ You answer fleet operations questions concisely with data-driven insights. Use m
   }
 
   app.listen(PORT, '0.0.0.0', () => {
+    const moved = PORT !== requestedPort ? ` (requested ${requestedPort} was busy)` : '';
     console.log(`
 ╔══════════════════════════════════════════╗
-║     TransitOps Server — Port ${PORT}       ║
+║     TransitOps Server — Port ${PORT}${moved.padEnd(7, ' ')}║
 ║     http://localhost:${PORT}               ║
 ║     Demo: admin@transitops.com            ║
 ║     Pass: TransitOps@2026                 ║

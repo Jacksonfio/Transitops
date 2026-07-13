@@ -6,11 +6,11 @@ import {
 import { BarChart3, TrendingUp, Truck, Users, Fuel, DollarSign, Download, Target, Leaf } from 'lucide-react';
 import { useApp } from '../context';
 
-const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899'];
+const COLORS = ['#0F766E', '#10B981', '#0A3C36', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899'];
 
 function SectionCard({ title, icon: Icon, color, children }: { title: string; icon: any; color: string; children: React.ReactNode }) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <div className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] p-6">
             <h3 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <Icon className={`w-4 h-4 ${color}`} /> {title}
             </h3>
@@ -120,7 +120,7 @@ export default function AnalyticsReports() {
                     { label: 'Net Profit', value: `$${(kpis.profit / 1000).toFixed(1)}K`, color: kpis.profit >= 0 ? 'text-emerald-600' : 'text-red-500' },
                     { label: 'Fleet ROI', value: `${kpis.fleetROI}%`, color: 'text-blue-600' },
                 ].map(k => (
-                    <div key={k.label} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 text-center">
+                    <div key={k.label} className="bg-white dark:bg-[#1C2526] rounded-2xl p-4 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] text-center">
                         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{k.label}</p>
                         <p className={`text-2xl font-bold ${k.color}`}>{k.value}</p>
                     </div>
@@ -170,7 +170,7 @@ export default function AnalyticsReports() {
                 </SectionCard>
 
                 {/* Driver Performance */}
-                <SectionCard title="Driver Performance (Safety Score)" icon={Users} color="text-purple-600">
+                <SectionCard title="Driver Performance (Safety Score)" icon={Users} color="text-[#0F766E]">
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={driverPerf}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
@@ -234,8 +234,8 @@ export default function AnalyticsReports() {
             </div>
 
             {/* Detailed Vehicle Metrics Table */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#E2EAE7] dark:border-[#2D3A32]">
                     <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                         <Truck className="w-4 h-4 text-blue-600" /> Vehicle Financial Summary
                     </h3>

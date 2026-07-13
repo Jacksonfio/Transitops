@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context';
 import { Driver, DriverStatus } from '../types';
+import { TableSkeleton } from './SkeletonLoader';
 
 const LICENSE_CATEGORIES = ['CDL-A', 'CDL-B', 'CDL-C', 'Class A', 'Class B', 'Class C', 'LMV', 'HMV', 'HPMV'];
 const STATUS_OPTIONS: DriverStatus[] = ['Available', 'Off Duty', 'Suspended'];
@@ -48,7 +49,7 @@ const EMPTY_DRIVER: Omit<Driver, 'id'> = {
 };
 
 export default function DriverManagement() {
-  const { drivers, vehicles, addDriver, updateDriver, deleteDriver } = useApp();
+  const { drivers, vehicles, addDriver, updateDriver, deleteDriver, isLoading } = useApp();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -87,6 +88,22 @@ export default function DriverManagement() {
     return days >= 0 && days <= 30;
   }).length;
   const expired = drivers.filter(d => new Date(d.licenseExpiry) < new Date()).length;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-7 w-48 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded animate-pulse" />
+            <div className="h-4 w-32 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded mt-2 animate-pulse" />
+          </div>
+        </div>
+        <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-6 border border-[#E2EAE7] dark:border-[#2D3A32]">
+          <TableSkeleton rows={6} cols={7} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -147,17 +164,17 @@ export default function DriverManagement() {
               key={d.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border transition-shadow hover:shadow-md ${isLicenseExpired ? 'border-red-200 dark:border-red-800' :
+              className={`bg-white dark:bg-[#1C2526] rounded-2xl p-5 shadow-sm border transition-shadow hover:shadow-md ${isLicenseExpired ? 'border-red-200 dark:border-red-800' :
                   isExpiringSoon ? 'border-amber-200 dark:border-amber-800' :
-                    'border-slate-200 dark:border-slate-700'
+                    'border-[#E2EAE7] dark:border-[#2D3A32]'
                 }`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0 ${d.status === 'Available' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
-                      d.status === 'On Trip' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
-                        d.status === 'Suspended' ? 'bg-gradient-to-br from-red-500 to-red-600' :
-                          'bg-gradient-to-br from-slate-400 to-slate-500'
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-lg shrink-0 ${d.status === 'Available' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white' :
+                      d.status === 'On Trip' ? 'bg-gradient-to-br from-[#0F766E] to-[#115E59] text-[#111827]' :
+                        d.status === 'Suspended' ? 'bg-gradient-to-br from-red-500 to-red-600 text-white' :
+                          'bg-gradient-to-br from-slate-400 to-slate-500 text-white'
                     }`}>
                     {d.name.charAt(0)}
                   </div>
@@ -167,7 +184,7 @@ export default function DriverManagement() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => openEdit(d)} className="p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-400 hover:text-blue-600 transition">
+                  <button onClick={() => openEdit(d)} className="p-1.5 rounded-lg hover:bg-[#0F766E]/10 dark:hover:bg-[#0F766E]/10 text-slate-400 hover:text-[#0F766E] transition">
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button onClick={() => setConfirmDelete(d.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition" disabled={d.status === 'On Trip'}>
@@ -202,7 +219,7 @@ export default function DriverManagement() {
 
                 <div className={`text-xs rounded-lg px-3 py-2 ${isLicenseExpired ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' :
                     isExpiringSoon ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' :
-                      'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                      'bg-[#F8FAF8] dark:bg-[#2D3A32] text-slate-600 dark:text-slate-400'
                   }`}>
                   <span className="font-semibold">License:</span> {d.licenseNumber} · Expires {d.licenseExpiry}
                   {isLicenseExpired && <span className="font-bold ml-1">⚠ EXPIRED</span>}
@@ -246,7 +263,7 @@ export default function DriverManagement() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-blue-600" />
+                  <Users className="w-5 h-5 text-[#0F766E]" />
                   {editDriver ? 'Edit Driver' : 'Add New Driver'}
                 </h3>
                 <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
@@ -315,7 +332,7 @@ export default function DriverManagement() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                 <button onClick={() => setShowModal(false)} className="btn-outline">Cancel</button>
                 <button onClick={handleSave} disabled={saving} className="btn-primary">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}

@@ -8,18 +8,20 @@ import { useApp } from '../context';
 import { FuelLog, Expense, ExpenseCategory } from '../types';
 
 const EXPENSE_CATEGORIES: ExpenseCategory[] = [
-    'Fuel', 'Maintenance', 'Toll', 'Parking', 'Insurance', 'Permit', 'Driver Salary', 'Other'
+    'Fuel', 'Maintenance', 'Toll', 'Parking', 'Insurance', 'Permit', 'Repair', 'Cleaning', 'Driver Salary', 'Other'
 ];
 
 const CATEGORY_CONFIG: Record<ExpenseCategory, { color: string; bg: string }> = {
     'Fuel': { color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/20' },
     'Maintenance': { color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/20' },
-    'Toll': { color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/20' },
-    'Parking': { color: 'text-slate-600', bg: 'bg-slate-100 dark:bg-slate-700' },
-    'Insurance': { color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/20' },
+    'Toll': { color: 'text-[#0F766E]', bg: 'bg-[#0F766E]/10 dark:bg-[#0F766E]/10' },
+    'Parking': { color: 'text-slate-600', bg: 'bg-slate-100 dark:bg-[#2D3A32]' },
+    'Insurance': { color: 'text-[#0F766E]', bg: 'bg-[#0F766E]/10 dark:bg-[#0F766E]/10' },
     'Permit': { color: 'text-cyan-600', bg: 'bg-cyan-100 dark:bg-cyan-900/20' },
+    'Repair': { color: 'text-[#7F1D1D]', bg: 'bg-red-100 dark:bg-red-900/20' },
+    'Cleaning': { color: 'text-[#65A30D]', bg: 'bg-lime-100 dark:bg-lime-900/20' },
     'Driver Salary': { color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/20' },
-    'Other': { color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-700' },
+    'Other': { color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-[#2D3A32]' },
 };
 
 export default function FuelExpenseManager() {
@@ -107,22 +109,22 @@ export default function FuelExpenseManager() {
 
             {/* Summary KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-5 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32]">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Fuel Cost</p>
                     <p className="text-2xl font-bold text-amber-600">${totalFuel.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                     <p className="text-xs text-slate-500 mt-1">{totalLiters.toFixed(0)} liters total</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-5 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32]">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Expenses</p>
                     <p className="text-2xl font-bold text-red-500">${totalExpenses.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                     <p className="text-xs text-slate-500 mt-1">{expenses.length} records</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-5 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32]">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fuel Logs</p>
-                    <p className="text-2xl font-bold text-blue-600">{fuelLogs.length}</p>
+                    <p className="text-2xl font-bold text-[#0F766E]">{fuelLogs.length}</p>
                     <p className="text-xs text-slate-500 mt-1">entries recorded</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-5 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32]">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Operational Cost</p>
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">${(totalFuel + totalExpenses).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                     <p className="text-xs text-slate-500 mt-1">Fuel + All Expenses</p>
@@ -130,9 +132,9 @@ export default function FuelExpenseManager() {
             </div>
 
             {/* Expense breakdown */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-6 shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32]">
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-blue-600" /> Expense Breakdown by Category
+                    <Receipt className="w-4 h-4 text-[#0F766E]" /> Expense Breakdown by Category
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {EXPENSE_CATEGORIES.filter(c => expenseByCategory[c] > 0).map(cat => {
@@ -152,10 +154,10 @@ export default function FuelExpenseManager() {
 
             {/* Tabs */}
             <div className="flex gap-2">
-                <button onClick={() => setActiveTab('fuel')} className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${activeTab === 'fuel' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>
-                    <Fuel className="w-4 h-4 inline mr-2" />Fuel Logs ({fuelLogs.length})
+                <button onClick={() => setActiveTab('fuel')} className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${activeTab === 'fuel' ? 'bg-[#0F766E] text-[#111827] border-[#0F766E]' : 'bg-white dark:bg-[#1C2526] text-slate-600 dark:text-[#6B7280] border-[#E2EAE7] dark:border-[#2D3A32]'}`}>
+                    Fuel Logs
                 </button>
-                <button onClick={() => setActiveTab('expenses')} className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${activeTab === 'expenses' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>
+                <button onClick={() => setActiveTab('expenses')} className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${activeTab === 'expenses' ? 'bg-[#0F766E] text-[#111827] border-[#0F766E]' : 'bg-white dark:bg-[#1C2526] text-slate-600 dark:text-[#6B7280] border-[#E2EAE7] dark:border-[#2D3A32]'}`}>
                     <DollarSign className="w-4 h-4 inline mr-2" />Expenses ({expenses.length})
                 </button>
             </div>
@@ -167,7 +169,7 @@ export default function FuelExpenseManager() {
 
             {/* Fuel Logs Table */}
             {activeTab === 'fuel' && (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="data-table">
                             <thead>
@@ -212,7 +214,7 @@ export default function FuelExpenseManager() {
 
             {/* Expenses Table */}
             {activeTab === 'expenses' && (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="data-table">
                             <thead>
@@ -318,7 +320,7 @@ export default function FuelExpenseManager() {
                                     <input value={fuelForm.notes} onChange={e => fFld('notes', e.target.value)} className="form-input" placeholder="Optional notes..." />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                                 <button onClick={() => setShowFuelModal(false)} className="btn-outline">Cancel</button>
                                 <button onClick={handleFuelSave} disabled={saving} className="btn-primary">
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
@@ -384,7 +386,7 @@ export default function FuelExpenseManager() {
                                     <input type="date" value={expForm.date} onChange={e => eFld('date', e.target.value)} className="form-input" />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                                 <button onClick={() => setShowExpenseModal(false)} className="btn-outline">Cancel</button>
                                 <button onClick={handleExpenseSave} disabled={saving} className="btn-primary">
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}

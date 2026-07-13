@@ -18,6 +18,7 @@ export interface User {
   role: UserRole;
   avatar?: string;
   lastLogin?: string;
+  password?: string;
 }
 
 // ── Vehicle ──────────────────────────────────
@@ -37,12 +38,22 @@ export interface Vehicle {
   purchaseDate: string;
   insuranceExpiry: string;
   status: VehicleStatus;
+  region?: string;
+  mileage?: number;                // km/L or km/kWh equivalent
   fuelType: 'Diesel' | 'Petrol' | 'Electric' | 'Hybrid' | 'CNG';
   currentDriverId?: string | null;
   gpsDeviceId?: string;
   notes?: string;
+  maintenanceHistory?: string[];
+  fuelHistory?: string[];
   // AI / computed
   healthScore?: number;            // 0-100
+  // Tracking
+  currentLatitude?: number;
+  currentLongitude?: number;
+  lastLocationUpdate?: string;
+  speed?: number;                  // km/h
+  heading?: number;                // degrees
 }
 
 // ── Driver ───────────────────────────────────
@@ -51,6 +62,7 @@ export type DriverStatus = 'Available' | 'On Trip' | 'Off Duty' | 'Suspended';
 export interface Driver {
   id: string;
   name: string;
+  photo?: string;
   licenseNumber: string;           // unique
   licenseCategory: string;         // CDL A, B, C etc.
   licenseExpiry: string;
@@ -67,7 +79,7 @@ export interface Driver {
 }
 
 // ── Trip ─────────────────────────────────────
-export type TripStatus = 'Draft' | 'Dispatched' | 'Completed' | 'Cancelled';
+export type TripStatus = 'Draft' | 'Pending' | 'Dispatched' | 'Completed' | 'Cancelled';
 
 export interface Trip {
   id: string;
@@ -91,6 +103,8 @@ export interface Trip {
   // AI
   estimatedFuelCost?: number;
   estimatedCO2?: number;           // kg
+  // Route
+  routeWaypoints?: Array<{ lat: number; lng: number; name?: string }>;
 }
 
 // ── Maintenance ──────────────────────────────
@@ -146,6 +160,8 @@ export type ExpenseCategory =
   | 'Parking'
   | 'Insurance'
   | 'Permit'
+  | 'Repair'
+  | 'Cleaning'
   | 'Driver Salary'
   | 'Other';
 
@@ -170,7 +186,7 @@ export interface Alert {
   severity: AlertSeverity;
   title: string;
   message: string;
-  category: 'License' | 'Insurance' | 'Maintenance' | 'Trip' | 'Vehicle' | 'System';
+  category: 'License' | 'Insurance' | 'Maintenance' | 'Trip' | 'Vehicle' | 'System' | 'Geofence' | 'Route';
   vehicleId?: string;
   driverId?: string;
   resolved: boolean;
@@ -217,4 +233,52 @@ export interface ChartDataPoint {
   name: string;
   value: number;
   [key: string]: any;
+}
+
+// ── Fleet Tracking & Geofencing ──────────────
+export interface Geofence {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'circular' | 'polygon';
+  center?: { lat: number; lng: number };
+  radius?: number;                 // meters (for circular)
+  coordinates?: Array<{ lat: number; lng: number }>; // for polygon
+  color: string;
+  active: boolean;
+  alertOnEnter: boolean;
+  alertOnExit: boolean;
+  vehicleIds?: string[];           // specific vehicles, empty = all
+  createdAt: string;
+}
+
+export interface VehiclePosition {
+  vehicleId: string;
+  latitude: number;
+  longitude: number;
+  speed: number;                   // km/h
+  heading: number;                 // degrees 0-360
+  timestamp: string;
+  status: VehicleStatus;
+}
+
+export interface RouteDeviation {
+  id: string;
+  tripId: string;
+  vehicleId: string;
+  deviationPoint: { lat: number; lng: number };
+  expectedPoint: { lat: number; lng: number };
+  distance: number;                // meters
+  timestamp: string;
+}
+
+export interface TrackingAlert {
+  id: string;
+  type: 'geofence_enter' | 'geofence_exit' | 'route_deviation' | 'speeding' | 'idle_alert';
+  vehicleId: string;
+  message: string;
+  severity: AlertSeverity;
+  location?: { lat: number; lng: number };
+  timestamp: string;
+  resolved: boolean;
 }

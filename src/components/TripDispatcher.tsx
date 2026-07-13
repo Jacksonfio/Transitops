@@ -7,12 +7,14 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context';
 import { Trip, TripStatus } from '../types';
+import { TableSkeleton } from './SkeletonLoader';
 
 const PRIORITY_OPTIONS = ['Low', 'Medium', 'High', 'Urgent'] as const;
 
 function StatusBadge({ status }: { status: TripStatus }) {
   const map: Record<TripStatus, string> = {
     'Draft': 'badge badge-draft',
+    'Pending': 'badge badge-pending',
     'Dispatched': 'badge badge-dispatched',
     'Completed': 'badge badge-completed',
     'Cancelled': 'badge badge-cancelled',
@@ -28,7 +30,7 @@ const EMPTY_TRIP = {
 };
 
 export default function TripManagement() {
-  const { trips, vehicles, drivers, createTrip, updateTripStatus } = useApp();
+  const { trips, vehicles, drivers, createTrip, updateTripStatus, isLoading } = useApp();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<TripStatus | ''>('');
   const [showModal, setShowModal] = useState(false);
@@ -114,8 +116,24 @@ export default function TripManagement() {
   });
 
   // Summary counts
-  const counts = { Draft: 0, Dispatched: 0, Completed: 0, Cancelled: 0 };
+  const counts = { Draft: 0, Pending: 0, Dispatched: 0, Completed: 0, Cancelled: 0 };
   trips.forEach(t => counts[t.status]++);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-7 w-48 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded animate-pulse" />
+            <div className="h-4 w-32 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded mt-2 animate-pulse" />
+          </div>
+        </div>
+        <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-6 border border-[#E2EAE7] dark:border-[#2D3A32]">
+          <TableSkeleton rows={5} cols={7} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -137,11 +155,11 @@ export default function TripManagement() {
             key={status}
             onClick={() => setFilterStatus(filterStatus === status ? '' : status)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${filterStatus === status
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                ? 'bg-[#0F766E] text-[#111827] border-[#0F766E]'
+                : 'bg-white dark:bg-[#1C2526] text-slate-600 dark:text-[#6B7280] border-[#E2EAE7] dark:border-[#2D3A32] hover:border-[#0F766E]/50'
               }`}
           >
-            <span className={`badge badge-${status.toLowerCase()} ${filterStatus === status ? 'bg-blue-500 text-white border-0' : ''}`} style={filterStatus === status ? { background: 'rgba(255,255,255,0.2)', color: 'white' } : {}}>
+            <span className={`badge badge-${status.toLowerCase()} ${filterStatus === status ? 'bg-[#115E59] text-white border-0' : ''}`} style={filterStatus === status ? { background: 'rgba(11,19,17,0.2)', color: '#111827' } : {}}>
               {count}
             </span>
             {status}
@@ -172,15 +190,15 @@ export default function TripManagement() {
               key={t.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] p-5 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.status === 'Dispatched' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.status === 'Dispatched' ? 'bg-[#0F766E]/10' :
                     t.status === 'Completed' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
                       t.status === 'Cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
-                        'bg-slate-100 dark:bg-slate-700'
+                        'bg-slate-100 dark:bg-[#2D3A32]'
                   }`}>
-                  <Navigation className={`w-4.5 h-4.5 ${t.status === 'Dispatched' ? 'text-blue-600 dark:text-blue-400' :
+                  <Navigation className={`w-4.5 h-4.5 ${t.status === 'Dispatched' ? 'text-[#0F766E]' :
                       t.status === 'Completed' ? 'text-emerald-600 dark:text-emerald-400' :
                         t.status === 'Cancelled' ? 'text-red-500' : 'text-slate-500'
                     }`} />
@@ -224,7 +242,7 @@ export default function TripManagement() {
 
                   {/* Action buttons */}
                   <div className="flex flex-col gap-1.5">
-                    {t.status === 'Draft' && (
+                    {(t.status === 'Draft' || t.status === 'Pending') && (
                       <button onClick={() => handleStatusChange(t, 'Dispatched')} className="btn-primary text-xs px-3 py-1.5">
                         <Navigation className="w-3 h-3" /> Dispatch
                       </button>
@@ -240,7 +258,7 @@ export default function TripManagement() {
                       </>
                     )}
                     {(t.status === 'Completed' || t.status === 'Cancelled') && (
-                      <span className={`text-xs px-3 py-1.5 rounded-lg text-center font-medium ${t.status === 'Completed' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-xs px-3 py-1.5 rounded-lg text-center font-medium ${t.status === 'Completed' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-[#2D3A32] text-slate-500'}`}>
                         {t.status === 'Completed' ? '✓ Closed' : '✗ Voided'}
                       </span>
                     )}
@@ -265,7 +283,7 @@ export default function TripManagement() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Navigation className="w-5 h-5 text-blue-600" /> Create New Trip
+                  <Navigation className="w-5 h-5 text-[#0F766E]" /> Create New Trip
                 </h3>
                 <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700">
                   <X className="w-5 h-5" />
@@ -280,14 +298,14 @@ export default function TripManagement() {
               )}
 
               {aiSuggestion && (
-                <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-3">
+                <div className="mb-4 bg-[#0F766E]/10 border border-[#0F766E]/30 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-blue-600" />
-                    <p className="text-blue-700 dark:text-blue-400 text-sm font-semibold">AI Dispatch Recommended</p>
+                    <Zap className="w-4 h-4 text-[#0F766E]" />
+                    <p className="text-[#115E59] text-sm font-semibold">AI Dispatch Recommended</p>
                   </div>
-                  <p className="text-blue-600 dark:text-blue-400 text-xs">{aiSuggestion.reasoning}</p>
-                  {aiSuggestion.recommendedVehicle && <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Vehicle: <strong>{aiSuggestion.recommendedVehicle.name}</strong> (Health: {aiSuggestion.recommendedVehicle.healthScore}%)</p>}
-                  {aiSuggestion.recommendedDriver && <p className="text-xs text-blue-700 dark:text-blue-300">Driver: <strong>{aiSuggestion.recommendedDriver.name}</strong> (Safety: {aiSuggestion.recommendedDriver.safetyScore}/100)</p>}
+                  <p className="text-[#115E59] text-xs">{aiSuggestion.reasoning}</p>
+                  {aiSuggestion.recommendedVehicle && <p className="text-xs text-[#115E59] mt-1">Vehicle: <strong>{aiSuggestion.recommendedVehicle.name}</strong> (Health: {aiSuggestion.recommendedVehicle.healthScore}%)</p>}
+                  {aiSuggestion.recommendedDriver && <p className="text-xs text-[#115E59]">Driver: <strong>{aiSuggestion.recommendedDriver.name}</strong> (Safety: {aiSuggestion.recommendedDriver.safetyScore}/100)</p>}
                 </div>
               )}
 
@@ -336,7 +354,7 @@ export default function TripManagement() {
                     type="button"
                     onClick={suggestAI}
                     disabled={loadingAI || !form.cargoWeight}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#0F766E] to-[#115E59] hover:from-[#14B8A6] hover:to-[#0F766E] text-[#111827] rounded-xl py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loadingAI ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                     AI Auto-Assign (Best Vehicle & Driver)
@@ -372,6 +390,7 @@ export default function TripManagement() {
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Create As</label>
                   <select value={form.status} onChange={e => fld('status', e.target.value)} className="form-select">
                     <option value="Draft">Draft (not dispatched)</option>
+                    <option value="Pending">Pending approval</option>
                     <option value="Dispatched">Dispatched immediately</option>
                   </select>
                 </div>
@@ -400,7 +419,7 @@ export default function TripManagement() {
                 );
               })()}
 
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                 <button onClick={() => setShowModal(false)} className="btn-outline">Cancel</button>
                 <button onClick={handleCreate} disabled={saving} className="btn-primary">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}

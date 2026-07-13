@@ -102,8 +102,8 @@ export default function MaintenanceScheduler() {
           <button
             key={status}
             onClick={() => setFilterStatus(filterStatus === status ? '' : status)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${filterStatus === status ? 'bg-blue-600 text-white border-blue-600' :
-                'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-blue-300'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${filterStatus === status ? 'bg-[#0F766E] text-[#111827] border-[#0F766E]' :
+                'bg-white dark:bg-[#1C2526] text-slate-600 dark:text-[#6B7280] border-[#E2EAE7] dark:border-[#2D3A32] hover:border-[#0F766E]/50'
               }`}
           >
             {count} {status}
@@ -132,17 +132,17 @@ export default function MaintenanceScheduler() {
               key={m.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5"
+              className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] p-5"
             >
               <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.status === 'In Progress' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.status === 'In Progress' ? 'bg-[#0F766E]/10' :
                     m.status === 'Completed' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
-                      m.status === 'Scheduled' ? 'bg-amber-100 dark:bg-amber-900/30' :
-                        'bg-slate-100 dark:bg-slate-700'
+                      m.status === 'Scheduled' ? 'bg-[#0F766E]/10' :
+                        'bg-slate-100 dark:bg-[#2D3A32]'
                   }`}>
-                  <Wrench className={`w-4.5 h-4.5 ${m.status === 'In Progress' ? 'text-blue-600 dark:text-blue-400' :
+                  <Wrench className={`w-4.5 h-4.5 ${m.status === 'In Progress' ? 'text-[#0F766E]' :
                       m.status === 'Completed' ? 'text-emerald-600 dark:text-emerald-400' :
-                        m.status === 'Scheduled' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500'
+                        m.status === 'Scheduled' ? 'text-[#0F766E]' : 'text-slate-500'
                     }`} />
                 </div>
 
@@ -150,7 +150,7 @@ export default function MaintenanceScheduler() {
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
                     <span className="font-mono text-xs font-bold text-slate-400">{m.id}</span>
                     <StatusBadge status={m.status} />
-                    <span className="badge bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{m.type}</span>
+                    <span className="badge bg-slate-100 dark:bg-[#2D3A32] text-slate-600 dark:text-slate-300">{m.type}</span>
                   </div>
 
                   <div className="flex items-center gap-2 mb-2">
@@ -175,7 +175,7 @@ export default function MaintenanceScheduler() {
 
                   <div className="flex flex-col gap-1.5">
                     {m.status === 'Scheduled' && (
-                      <button onClick={() => handleStatusUpdate(m, 'In Progress')} className="btn-outline text-xs px-3 py-1.5 hover:border-blue-400 hover:text-blue-600">
+                      <button onClick={() => handleStatusUpdate(m, 'In Progress')} className="btn-outline text-xs px-3 py-1.5 hover:border-[#0F766E] hover:text-[#0F766E]">
                         Start Work
                       </button>
                     )}
@@ -210,7 +210,7 @@ export default function MaintenanceScheduler() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-blue-600" /> Create Maintenance Record
+                  <Wrench className="w-5 h-5 text-[#0F766E]" /> Create Maintenance Record
                 </h3>
                 <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
               </div>
@@ -285,7 +285,7 @@ export default function MaintenanceScheduler() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                 <button onClick={() => setShowModal(false)} className="btn-outline">Cancel</button>
                 <button onClick={handleSave} disabled={saving} className="btn-primary">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}

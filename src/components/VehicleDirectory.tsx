@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context';
 import { Vehicle, VehicleStatus, VehicleType } from '../types';
+import { TableSkeleton } from './SkeletonLoader';
 
 const VEHICLE_TYPES: VehicleType[] = ['Truck', 'Van', 'Bus', 'Trailer', 'SUV', 'Motorcycle'];
 const FUEL_TYPES = ['Diesel', 'Petrol', 'Electric', 'Hybrid', 'CNG'] as const;
@@ -104,6 +105,22 @@ export default function VehicleDirectory() {
 
   const fld = (key: keyof typeof form, val: any) => setForm(p => ({ ...p, [key]: val }));
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-7 w-48 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded animate-pulse" />
+            <div className="h-4 w-32 bg-[#D7E3DB] dark:bg-[#2D3A32] rounded mt-2 animate-pulse" />
+          </div>
+        </div>
+        <div className="bg-white dark:bg-[#1C2526] rounded-2xl p-6 border border-[#E2EAE7] dark:border-[#2D3A32]">
+          <TableSkeleton rows={6} cols={8} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -134,7 +151,7 @@ export default function VehicleDirectory() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-white dark:bg-[#1C2526] rounded-2xl shadow-sm border border-[#E2EAE7] dark:border-[#2D3A32] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
@@ -164,9 +181,9 @@ export default function VehicleDirectory() {
                     >
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 ${v.status === 'Available' ? 'bg-emerald-500' :
-                              v.status === 'On Trip' ? 'bg-blue-500' :
-                                v.status === 'In Shop' ? 'bg-amber-500' : 'bg-slate-400'
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${v.status === 'Available' ? 'bg-emerald-500 text-white' :
+                              v.status === 'On Trip' ? 'bg-[#0F766E] text-[#111827]' :
+                                v.status === 'In Shop' ? 'bg-amber-500 text-white' : 'bg-slate-400 text-white'
                             }`}>
                             <Truck className="w-4 h-4" />
                           </div>
@@ -177,7 +194,7 @@ export default function VehicleDirectory() {
                         </div>
                       </td>
                       <td><span className="font-mono text-xs font-medium text-slate-700 dark:text-slate-300">{v.registrationNumber}</span></td>
-                      <td><span className="badge bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{v.type}</span></td>
+                      <td><span className="badge bg-slate-100 dark:bg-[#2D3A32] text-slate-600 dark:text-slate-300">{v.type}</span></td>
                       <td className="font-medium">{v.loadCapacity.toLocaleString()} kg</td>
                       <td className="font-mono text-xs">{v.odometer.toLocaleString()} km</td>
                       <td><HealthBadge score={v.healthScore} /></td>
@@ -185,7 +202,7 @@ export default function VehicleDirectory() {
                       <td className="text-sm text-slate-600 dark:text-slate-400">{driver?.name || <span className="text-slate-300">—</span>}</td>
                       <td>
                         <div className="flex items-center gap-2">
-                          <button onClick={e => { e.stopPropagation(); openEdit(v); }} className="p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-400 hover:text-blue-600 transition">
+                          <button onClick={e => { e.stopPropagation(); openEdit(v); }} className="p-1.5 rounded-lg hover:bg-[#0F766E]/10 dark:hover:bg-[#0F766E]/10 text-slate-400 hover:text-[#0F766E] transition">
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={e => { e.stopPropagation(); setConfirmDelete(v.id); }} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition" disabled={v.status === 'On Trip'}>
@@ -198,7 +215,7 @@ export default function VehicleDirectory() {
                     {/* Expanded row */}
                     {expandedId === v.id && (
                       <tr>
-                        <td colSpan={9} className="bg-slate-50 dark:bg-slate-700/50 px-6 py-4">
+                        <td colSpan={9} className="bg-[#F8FAF8] dark:bg-[#2D3A32]/50 px-6 py-4">
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
                               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Acquisition Cost</p>
@@ -247,7 +264,7 @@ export default function VehicleDirectory() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-blue-600" />
+                  <Truck className="w-5 h-5 text-[#0F766E]" />
                   {editVehicle ? 'Edit Vehicle' : 'Register New Vehicle'}
                 </h3>
                 <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
@@ -323,7 +340,7 @@ export default function VehicleDirectory() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2EAE7] dark:border-[#2D3A32]">
                 <button onClick={() => setShowModal(false)} className="btn-outline">Cancel</button>
                 <button onClick={handleSave} disabled={saving} className="btn-primary">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
